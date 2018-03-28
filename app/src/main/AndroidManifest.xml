@@ -3,7 +3,7 @@
           package="com.coalminesoftware.bezier">
 
     <application android:label="Bézier">
-        <activity android:name=".MainActivity">
+        <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

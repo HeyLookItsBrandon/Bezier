@@ -1,6 +1,5 @@
-package com.coalminesoftware.bezier;
+package com.coalminesoftware.bezier.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -12,20 +11,21 @@ import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.View;
 
-import java.util.ArrayList;
+import com.coalminesoftware.bezier.BezierUtils;
+import com.coalminesoftware.bezier.Point;
+
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.coalminesoftware.bezier.ControlPointGenerator.generateControlPoints;
-
 public class BezierView extends View {
-	Paint curvePaint = buildStrokePaint(5, 0xFFCC0000);
-	Paint dotPaint = buildFillPaint(0xFF0000CC);
-	Paint controlPointLinePaint = buildStrokePaint(5, 0x4400CC00);
-	Paint controlPointDotPaint = buildFillPaint(0xFF00CC00);
+	/** How many segments to create between points on a curve. */
+	private static final int CURVE_SEGMENT_DIVISION_COUNT = 3;
+	private Paint curvePaint = buildStrokePaint(5, 0x44CC0000);
+	private Paint dotPaint = buildFillPaint(0xFF0000CC);
+	private Paint controlPointLinePaint = buildStrokePaint(5, 0x4400CC00);
+	private Paint controlPointDotPaint = buildFillPaint(0xFF00CC00);
+	private Paint generateCurvePaint = buildStrokePaint(5, 0xFFFFAA00);
 
 	public BezierView(Context context) {
 		super(context);
@@ -49,7 +49,8 @@ public class BezierView extends View {
 
 		List<Point> points = buildTestPoints(canvas);
 
-		Map<Point, Pair<Point, Point>> controlPointsByLeadingPoint = generateControlPoints(points);
+		Map<Point, Pair<Point, Point>> controlPointsByLeadingPoint =
+				BezierUtils.generateControlPoints(points);
 
 		Point trailingPoint = null;
 		for (Point leadingPoint : points) {
@@ -67,8 +68,25 @@ public class BezierView extends View {
 			trailingPoint = leadingPoint;
 		}
 
-		Path path = buildPath(points, controlPointsByLeadingPoint);
+		Path path = buildCubicPath(points, controlPointsByLeadingPoint);
 		canvas.drawPath(path, curvePaint);
+
+		List<Point> curvePointString = BezierUtils.buildCurveLineString(
+				points, controlPointsByLeadingPoint, CURVE_SEGMENT_DIVISION_COUNT);
+		canvas.drawPath(buildLineStringPath(curvePointString), generateCurvePaint);
+	}
+
+	private Path buildLineStringPath(List<Point> curvePointString) {
+		Path path = new Path();
+
+		Point point = curvePointString.get(0);
+		path.moveTo(point.x, point.y);
+		for(int i = 1; i < curvePointString.size(); i++) {
+			point = curvePointString.get(i);
+			path.lineTo(point.x, point.y);
+		}
+
+		return path;
 	}
 
 	private static List<Point> buildTestPoints(Canvas canvas) {
@@ -89,7 +107,7 @@ public class BezierView extends View {
 				end.x, end.y, paint);
 	}
 
-	private static Path buildPath(List<Point> points, Map<Point,Pair<Point,Point>> controlPointsBySegment) {
+	private static Path buildCubicPath(List<Point> points, Map<Point,Pair<Point,Point>> controlPointsBySegment) {
 		Path path = new Path();
 
 		Point point = points.get(0);
@@ -106,6 +124,7 @@ public class BezierView extends View {
 				Point c2 = controlPoints.second;
 
 				path.cubicTo(c1.x, c1.y, c2.x, c2.y, point.x, point.y);
+
 			}
 		}
 

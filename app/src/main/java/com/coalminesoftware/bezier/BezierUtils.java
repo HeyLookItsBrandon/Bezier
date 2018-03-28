@@ -3,13 +3,14 @@ package com.coalminesoftware.bezier;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.coalminesoftware.bezier.CollectionUtils.createFilledList;
 
-public class ControlPointGenerator {
+public class BezierUtils {
     /**
      * Given a list of points, generates control points for a cubic Bézier curve through them.
      * <p>
@@ -165,5 +166,48 @@ public class ControlPointGenerator {
                     secondControlPoints.get(i)));
         }
         return controlPointsByPoints;
+    }
+
+    public static List<Point> buildCurveLineString(List<Point> points,
+            Map<Point, Pair<Point, Point>> controlPointPairsByLeadingPoint,
+            int divisions) {
+        List<Point> renderedPoints = new ArrayList<>();
+        renderedPoints.add(points.get(0));
+
+        Point trailingPoint = points.get(0);
+        for(int i = 1; i < points.size(); i++) {
+            Point leadingPoint = points.get(i);
+            Pair<Point, Point> controlPoints = controlPointPairsByLeadingPoint.get(leadingPoint);
+
+            for(int j = 0; j < divisions; j++) {
+                renderedPoints.add(reduceToPoint(
+                        Arrays.asList(trailingPoint, controlPoints.first, controlPoints.second, leadingPoint),
+                        (float) j / divisions));
+            }
+
+            renderedPoints.add(leadingPoint);
+            trailingPoint = leadingPoint;
+        }
+
+        return renderedPoints;
+    }
+
+    private static Point reduceToPoint(List<Point> points, float ratio) {
+        if(points.size() == 1) {
+            return points.get(0);
+        }
+
+        List<Point> midpoints = new ArrayList<>();
+        for(int i = 0; i < points.size() - 1; i++) {
+            midpoints.add(calcMidpoint(points.get(i), points.get(i + 1), ratio));
+        }
+
+        return reduceToPoint(midpoints, ratio);
+    }
+
+    private static Point calcMidpoint(Point start, Point end, float ratio) {
+        return new Point(
+                start.x + ratio * (end.x - start.x),
+                start.y + ratio * (end.y - start.y));
     }
 }
