@@ -179,7 +179,7 @@ public class BezierUtils {
             Point leadingPoint = points.get(i);
             Pair<Point, Point> controlPoints = controlPointPairsByLeadingPoint.get(leadingPoint);
 
-            for(int j = 0; j < divisions; j++) {
+            for(int j = 1; j < divisions; j++) {
                 renderedPoints.add(reduceToPoint(
                         Arrays.asList(trailingPoint, controlPoints.first, controlPoints.second, leadingPoint),
                         (float) j / divisions));
