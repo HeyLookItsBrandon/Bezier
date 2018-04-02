@@ -1,0 +1,15 @@
+# For (slightly) more detailed information on code owners, see
+# https://blog.github.com/2017-07-06-introducing-code-owners/ and
+# https://help.github.com/articles/about-codeowners/
+#
+# As an overview, each line contains a file pattern followed by one or more
+# owners, given as either a username (@whoever) or email (whoever@gmail.com.)
+# If a set of changes matches multiple patterns, only the last pattern is used.
+#
+# * defines a global owner for changes that don't match a subsequent pattern.
+# *.java matches any Java file
+# /app/src/ matches any file in or beneath the directory.
+# /app/src/* matches any file in (but not beneath) the directory.
+# src/ matches any file in any src directory.
+
+* @HeyLookItsBrandon
